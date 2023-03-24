@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from clip import simple_tokenizer
 from scenic.projects.baselines.clip import download
+from filelock import FileLock
 
 
 # pylint: disable=line-too-long
@@ -32,7 +33,8 @@ def build_tokenizer(
 ) -> simple_tokenizer.SimpleTokenizer:
   """Returns CLIP's tokenizer."""
   if bpe_path is None:
-    bpe_path = download.download(bpe_url, download_dir)
-    logging.info('Downloaded vocabulary from %s to %s', bpe_url, download_dir)
+    with FileLock("/tmp/clip-lock"):
+      bpe_path = download.download(bpe_url, download_dir)
+      logging.info('Downloaded vocabulary from %s to %s', bpe_url, download_dir)
 
   return simple_tokenizer.SimpleTokenizer(bpe_path)
